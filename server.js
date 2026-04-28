@@ -5,16 +5,15 @@ const app = express();
 app.use(express.json());
 
 // 🔥 CHANGE THESE
-const TOKEN = "PASTE_YOUR_GITHUB_TOKEN";
+const TOKEN = "YOUR_GITHUB_TOKEN";
 const OWNER = "YOUR_USERNAME";
-const REPO = "YOUR_APK_BUILDER_REPO";
-const WORKFLOW = "build.yml";
+const REPO = "apk-backend1";
 
-// ✅ STEP 1: Trigger build
+// ✅ Build start
 app.post("/build", async (req, res) => {
   const url = req.body.url;
 
-  await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
+  await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/build.yml/dispatches`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${TOKEN}`,
@@ -32,7 +31,7 @@ app.post("/build", async (req, res) => {
   res.json({ message: "Build started" });
 });
 
-// ✅ STEP 2: Check status + get APK/AAB
+// ✅ Status check + download
 app.get("/status", async (req, res) => {
   const runs = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/runs`, {
     headers: { Authorization: `Bearer ${TOKEN}` }
@@ -59,4 +58,4 @@ app.get("/status", async (req, res) => {
   res.json({ done: false });
 });
 
-app.listen(3000, () => console.log("Server running"));
+app.listen(3000);

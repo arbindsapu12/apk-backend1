@@ -4,12 +4,17 @@ const fetch = require("node-fetch");
 const app = express();
 app.use(express.json());
 
-// 🔥 CHANGE THESE
-const TOKEN = "YOUR_GITHUB_TOKEN";
-const OWNER = "YOUR_USERNAME";
+// 🔥 IMPORTANT
+const TOKEN = process.env.GITHUB_TOKEN;
+const OWNER = "arbindsapu12";  // <-- अपना GitHub username डालो
 const REPO = "apk-backend1";
 
-// ✅ Build start
+// ✅ TEST
+app.get("/", (req, res) => {
+  res.send("Server is running 🚀");
+});
+
+// ✅ Build
 app.post("/build", async (req, res) => {
   const url = req.body.url;
 
@@ -31,7 +36,7 @@ app.post("/build", async (req, res) => {
   res.json({ message: "Build started" });
 });
 
-// ✅ Status check + download
+// ✅ Status
 app.get("/status", async (req, res) => {
   const runs = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/runs`, {
     headers: { Authorization: `Bearer ${TOKEN}` }
@@ -39,7 +44,7 @@ app.get("/status", async (req, res) => {
 
   const latest = runs.workflow_runs[0];
 
-  if (latest.status === "completed") {
+  if (latest && latest.status === "completed") {
 
     const artifacts = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/artifacts`, {
       headers: { Authorization: `Bearer ${TOKEN}` }
@@ -50,12 +55,17 @@ app.get("/status", async (req, res) => {
 
     return res.json({
       done: true,
-      apk: apk.archive_download_url,
-      aab: aab.archive_download_url
+      apk: apk?.archive_download_url,
+      aab: aab?.archive_download_url
     });
   }
 
   res.json({ done: false });
 });
 
-app.listen(3000);
+// 🔥 PORT FIX (सबसे जरूरी)
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
